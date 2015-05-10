@@ -25,7 +25,7 @@ ASM = nasm
 all: directories $(DISTDIR)/kernel.bin
 
 clean:
-	rm -rf **/*.o **/*.d kernel.bin
+	rm -rf obj/** dist/**
 
 $(DISTDIR)/kernel.bin: $(OBJFILES)
 	$(LD) $(LDFLAGS) $(OBJFILES) -o $@
