@@ -1,3 +1,3 @@
-void _start(void);
+void kmain(void);
 
-void _start(void) {}
+void kmain(void) { while(1){} }
