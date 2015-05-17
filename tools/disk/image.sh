@@ -2,7 +2,7 @@ DISK_IMAGE_PATH=dist/disk.img
 
 dd if=/dev/zero of=$DISK_IMAGE_PATH bs=512 count=64k
 
-sudo fdisk $DISK_IMAGE_PATH << EOF
+fdisk $DISK_IMAGE_PATH << EOF
 n
 p
 1
@@ -12,14 +12,21 @@ a
 1
 w
 EOF
-sudo fdisk -lu $DISK_IMAGE_PATH
-sudo losetup /dev/loop0 $DISK_IMAGE_PATH
-sudo losetup -o 1048576 /dev/loop1 $DISK_IMAGE_PATH
-sudo mkfs.ext2 /dev/loop1
-sudo mount -t ext2 /dev/loop1 /mnt/
-sudo cp -R dist/boot/* /mnt/
-sudo grub-install --root-directory=/mnt --no-floppy \
+fdisk -lu $DISK_IMAGE_PATH
+losetup /dev/loop0 $DISK_IMAGE_PATH
+losetup -o 1048576 /dev/loop1 $DISK_IMAGE_PATH
+mkfs.ext2 /dev/loop1
+mkdir -p /mnt/agos
+mount -t ext2 /dev/loop1 /mnt/agos
+cp -R dist/boot/* /mnt/agos
+grub-install --root-directory=/mnt/agos --no-floppy \
 	--modules="normal part_msdos ext2 multiboot" /dev/loop0
-sudo umount /mnt/
-sudo losetup -d /dev/loop1
-sudo losetup -d /dev/loop0
+cat > /mnt/agos/boot/grub/grub.cfg << EOF
+menuentry \"agos\" {
+	multiboot2 (hd0,msdos1)/kernel.bin
+	boot
+}
+EOF
+umount /mnt/agos
+losetup -d /dev/loop1
+losetup -d /dev/loop0

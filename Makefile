@@ -32,7 +32,7 @@ clean:
 	find $(DISTDIR) -not -name ".*" -type f -delete
 
 $(DISTDIR)/disk.img: $(DISTDIR)/boot/kernel.bin
-	./tools/disk/image.sh
+	sudo ./tools/disk/image.sh
 
 $(DISTDIR)/boot/kernel.bin: $(OBJFILES)
 	$(LD) $(LDFLAGS) $(OBJFILES) -o $@
