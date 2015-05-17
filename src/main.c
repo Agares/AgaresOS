@@ -2,7 +2,9 @@
 
 void kmain(int, int);
 
-void kmain(int magic, int ptr) { 
+void kmain(int magic, int ptr) {
+	magic = magic; ptr = ptr;
+
 	character_color char_color = { 
 		.foreground = COLOR_YELLOW,
 		.background = COLOR_BLACK 
