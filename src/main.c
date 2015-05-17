@@ -2,7 +2,7 @@
 #include "libc/stdlib.h"
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
-#include "multiboot2.h"
+#include "multiboot/multiboot2.h"
 #pragma GCC diagnostic pop
 
 void kmain(uint32_t, uint32_t);
