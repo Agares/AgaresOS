@@ -25,7 +25,7 @@ ASM = nasm
 all: $(DISTDIR)/boot/kernel.bin
 
 qemu: $(DISTDIR)/disk.img
-	qemu-system-x86_64 $<
+	qemu-system-x86_64 -s $<
 
 clean:
 	find $(OBJDIR) -not -name ".*" -type f -delete
