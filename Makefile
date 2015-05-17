@@ -13,7 +13,7 @@ OBJFILES := $(COBJFILES) $(ASMOBJFILES)
 WARNINGFLAGS := -Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
 	-Wwrite-strings -Wmissing-prototypes -Wmissing-declarations \
 	-Wredundant-decls -Wnested-externs -Winline -Wno-long-long \
-	-Wuninitialized -Wconversion -Wstrict-prototypes
+	-Wuninitialized -Wconversion -Werror
 
 CFLAGS := -fno-asynchronous-unwind-tables -m32 -nostdlib -ffreestanding -std=c11 $(WARNINGFLAGS)
 LDFLAGS := -melf_i386 -static -L ./ -T ./$(SRCDIR)/linker.ld
