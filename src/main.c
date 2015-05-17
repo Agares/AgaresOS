@@ -1,5 +1,6 @@
 #include "early/video.h"
 #include "libc/stdlib.h"
+#include "early/panic.h"
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 #include "multiboot/multiboot2.h"
@@ -15,9 +16,7 @@ void kmain(uint32_t magic, uint32_t multiboot_information) {
  
 	early_video_put_string("agos, version 0\n", char_color); 
 	if(magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
-		// todo create panic macro and use it here
-		early_video_put_string("Loaded from not multiboot-complaiant bootloader.", char_color);
-		while(1){}
+		EARLY_PANIC("Loaded from not multiboot-complaiant bootloader.");
 	}
 
 	struct multiboot_tag *tag;
@@ -33,13 +32,6 @@ void kmain(uint32_t magic, uint32_t multiboot_information) {
 		early_video_put_string(buffer, char_color);
 		early_video_put_char('\n', char_color);
 	}
-
-	char buffer[33];
-	itoa(1024, buffer, 2);
-	early_video_put_string(buffer, char_color);
-	early_video_put_char(' ', char_color);
-	itoa(1024, buffer, 10);
-	early_video_put_string(buffer, char_color);
-
-	while(1){} 
+	
+	EARLY_PANIC("TERMINATED");
 }
