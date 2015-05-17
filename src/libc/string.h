@@ -1,0 +1,7 @@
+#pragma once
+#include <stddef.h>
+
+size_t strlen(const char *string);
+
+// non-standard extension
+char *strrev(char *string);
