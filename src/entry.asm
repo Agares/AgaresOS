@@ -2,7 +2,7 @@ extern kmain
 
 global _start
 _start:
-	mov esp,[stack_end]
+	mov esp, stack_end
 
 	push ebx ; multiboot information structure
 	push eax ; multiboot magic number
