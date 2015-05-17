@@ -1,3 +1,3 @@
-void kmain(void);
+void kmain(int, int);
 
-void kmain(void) { while(1){} }
+void kmain(int magic, int ptr) { while(1){} }
