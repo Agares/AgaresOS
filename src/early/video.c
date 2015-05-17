@@ -19,6 +19,14 @@ pack_character_with_color(unsigned char character, character_color char_color) {
 	return (uint16_t)(((int)character) | (color_flags << 8));
 }
 
+static inline void
+new_line() {
+	int y = video_cursor / width;
+
+	video_cursor = (y+1)*width;
+	check_for_video_memory_overflow();
+}
+
 void 
 early_video_clear(void) {
 	for(int i = 0; i < width*height; i++) {
@@ -30,7 +38,15 @@ early_video_clear(void) {
 inline void 
 early_video_put_char(char character, character_color char_color) {
 	check_for_video_memory_overflow();
-	video_memory[video_cursor++] = pack_character_with_color((unsigned char)character, char_color);
+	
+	switch(character) {
+		case '\n':
+			new_line();
+			break;
+		default:
+			video_memory[video_cursor++] = pack_character_with_color((unsigned char)character, char_color);
+			break;
+	}
 }
 
 void 
