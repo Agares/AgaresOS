@@ -8,7 +8,7 @@ static int video_cursor = 0;
 
 static inline void
 check_for_video_memory_overflow() {
-	if (video_cursor == width*height) {
+	if (video_cursor >= width*height) {
 		early_video_clear();
 	}
 }
@@ -37,8 +37,6 @@ early_video_clear(void) {
 
 inline void 
 early_video_put_char(char character, character_color char_color) {
-	check_for_video_memory_overflow();
-	
 	switch(character) {
 		case '\n':
 			new_line();
@@ -47,6 +45,8 @@ early_video_put_char(char character, character_color char_color) {
 			video_memory[video_cursor++] = pack_character_with_color((unsigned char)character, char_color);
 			break;
 	}
+	
+	check_for_video_memory_overflow();
 }
 
 void 
