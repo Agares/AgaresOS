@@ -33,5 +33,5 @@ void kmain(uint32_t magic, uint32_t multiboot_information) {
 		early_video_put_char('\n', char_color);
 	}
 	
-	EARLY_PANIC("TERMINATED");
+	while(1);
 }
