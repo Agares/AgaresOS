@@ -27,6 +27,9 @@ all: $(DISTDIR)/boot/kernel.bin
 qemu: $(DISTDIR)/disk.img
 	qemu-system-x86_64 -s $<
 
+bochs: $(DISTDIR)/disk.img
+	bochs
+
 clean:
 	find $(OBJDIR) -not -name ".*" -type f -delete
 	find $(DISTDIR) -not -name ".*" -type f -delete
