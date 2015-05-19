@@ -1,6 +1,7 @@
 #include "early/video.h"
 #include "libc/stdlib.h"
 #include "early/panic.h"
+#include "arch/x86/gdt.h"
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 #include "multiboot/multiboot2.h"
@@ -32,6 +33,8 @@ void kmain(uint32_t magic, uint32_t multiboot_information) {
 		early_video_put_string(buffer, char_color);
 		early_video_put_char('\n', char_color);
 	}
+
+	x86_gdt_setup();
 	
 	while(1);
 }
