@@ -1,9 +1,3 @@
-.idea
-CMakeLists.txt
-CMakeCache.txt
-CMakeFiles
-cmake_install.cmake
-install_manifest.txt
-.vagrant/
 obj/
 dist/
+.ycm_extra_conf*
