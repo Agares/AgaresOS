@@ -19,12 +19,14 @@ mkfs.ext2 /dev/loop1
 mkdir -p /mnt/agos
 mount -t ext2 /dev/loop1 /mnt/agos
 cp -R dist/boot/* /mnt/agos
+dd if=/dev/zero of=/mnt/agos/zero.bin bs=512 count=1024
 grub-install --root-directory=/mnt/agos --no-floppy \
 	--modules="normal part_msdos ext2 multiboot" /dev/loop0
 cat > /mnt/agos/boot/grub/grub.cfg << EOF
 menuentry \"agos\" {
-	multiboot2 (hd0,msdos1)/kernel.bin
-	boot
+	set root=(hd0,msdos1)
+	multiboot2 /kernel.bin
+	module2 /zero.bin
 }
 EOF
 umount /mnt/agos
