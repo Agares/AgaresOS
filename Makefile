@@ -41,7 +41,9 @@ $(DISTDIR)/boot/kernel.bin: $(OBJFILES)
 	$(LD) $(LDFLAGS) $(OBJFILES) -o $@
 
 $(OBJDIR)/%.a.o: $(SRCDIR)/%.asm
+	mkdir -p $(@D)
 	$(ASM) $(ASMFLAGS) $< -o $@
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.c 
+	mkdir -p $(@D)
 	$(CC) $(CFLAGS) -c $< -o $@
