@@ -18,15 +18,16 @@ losetup -o 1048576 /dev/loop1 $DISK_IMAGE_PATH
 mkfs.ext2 /dev/loop1
 mkdir -p /mnt/agos
 mount -t ext2 /dev/loop1 /mnt/agos
-cp -R dist/boot/* /mnt/agos
-dd if=/dev/zero of=/mnt/agos/zero.bin bs=512 count=1024
+cp -R loader/dist/boot/* /mnt/agos
+cp -R kernel/dist/boot/* /mnt/agos
 grub-install --root-directory=/mnt/agos --no-floppy \
 	--modules="normal part_msdos ext2 multiboot" /dev/loop0
 cat > /mnt/agos/boot/grub/grub.cfg << EOF
 menuentry \"agos\" {
 	set root=(hd0,msdos1)
-	multiboot2 /kernel.bin
-	module2 /zero.bin
+
+	module2 /kernel.bin
+	multiboot2 /loader.bin
 }
 EOF
 umount /mnt/agos

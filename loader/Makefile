@@ -3,17 +3,8 @@
 LDFLAGS +=  -T ./$(SRCDIR)/linker.ld
 .PHONY: all clean dist kernel.bin qemu
 
-all: $(DISTDIR)/boot/kernel.bin
+all: $(DISTDIR)/boot/loader.bin
 
-qemu: $(DISTDIR)/disk.img
-	qemu-system-x86_64 -s $<
-
-bochs: $(DISTDIR)/disk.img
-	bochs
-
-$(DISTDIR)/disk.img: $(DISTDIR)/boot/kernel.bin
-	sudo ./tools/disk/image.sh
-
-$(DISTDIR)/boot/kernel.bin: $(OBJFILES)
+$(DISTDIR)/boot/loader.bin: $(OBJFILES)
 	$(LD) $(LDFLAGS) $(OBJFILES) -o $@
 
