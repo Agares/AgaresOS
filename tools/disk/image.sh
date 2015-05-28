@@ -26,8 +26,8 @@ cat > /mnt/agos/boot/grub/grub.cfg << EOF
 menuentry \"agos\" {
 	set root=(hd0,msdos1)
 
-	module2 /kernel.bin
 	multiboot2 /loader.bin
+	module2 /kernel.bin
 }
 EOF
 umount /mnt/agos
