@@ -15,9 +15,9 @@ WARNINGFLAGS := -Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
 	-Wredundant-decls -Wnested-externs -Winline -Wno-long-long \
 	-Wuninitialized -Wconversion -Werror
 
-CFLAGS := -fno-asynchronous-unwind-tables -m32 -nostdlib -ffreestanding -std=c11 $(WARNINGFLAGS)
-LDFLAGS := -melf_i386 -static -L ./
-ASMFLAGS := -felf32
+CFLAGS := -fno-asynchronous-unwind-tables -nostdlib -ffreestanding -std=c11 $(WARNINGFLAGS)
+LDFLAGS := -static -L ./
+ASMFLAGS := 
 ASM = nasm
 
 clean:

@@ -1,5 +1,5 @@
 # 32-bit part of the kernel (let's call it loader)
-- [ ] Ability to find out information about modules (where are they located, how big are they, etc.)
+- [x] Ability to find out information about modules (where are they located, how big are they, etc.)
 
 # 64-bit part of the kernel
 - [ ] IDT
