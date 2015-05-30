@@ -12,7 +12,6 @@ extern character_color early_log_colors;
 		char buffer[33]; \
 		itoa(num, buffer, base); \
 		early_video_put_string(buffer, early_log_colors); \
-		early_video_put_string("\n", early_log_colors); \
 } while (0)
 
 
