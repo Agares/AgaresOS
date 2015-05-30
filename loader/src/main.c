@@ -5,6 +5,7 @@
 #include "arch/x86/gdt.h"
 #include "multiboot/tag.h"
 #include "multiboot/module.h"
+#include "elf/loader.h"
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 #include "multiboot/multiboot2.h"
@@ -32,7 +33,7 @@ void kmain(uint32_t magic, uint32_t multiboot_information) {
 	struct multiboot_tag *tag = multiboot_find_next_tag(MULTIBOOT_TAG_TYPE_MODULE, multiboot_tags_start);
 
 	if(tag == NULL) {
-			early_video_put_string("Module tag not found.\n", char_color);
+			EARLY_PANIC("Module tag not found.");
 	} else {
 			early_video_put_string("Module tag found at ", char_color);
 			char buffer[33];
@@ -48,6 +49,8 @@ void kmain(uint32_t magic, uint32_t multiboot_information) {
 	LOG(" with size ");
 	LOG_NUMBER_DEC((int)module->size);
 	LOG("\n");
+
+	elf_loader_load((void*)module->load_address);
 	
 	while(1);
 }
