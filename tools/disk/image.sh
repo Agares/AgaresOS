@@ -1,5 +1,7 @@
 DISK_IMAGE_PATH=dist/disk.img
 
+mkdir -p dist
+
 dd if=/dev/zero of=$DISK_IMAGE_PATH bs=512 count=64k
 
 fdisk $DISK_IMAGE_PATH << EOF
@@ -20,7 +22,8 @@ mkdir -p /mnt/agos
 mount -t ext2 /dev/loop1 /mnt/agos
 cp -R loader/dist/boot/* /mnt/agos
 cp -R kernel/dist/boot/* /mnt/agos
-grub-install --root-directory=/mnt/agos --no-floppy \
+mkdir -p /mnt/agos/boot/grub/
+grub-install --target=i386-pc --root-directory=/mnt/agos --no-floppy \
 	--modules="normal part_msdos ext2 multiboot" /dev/loop0
 cat > /mnt/agos/boot/grub/grub.cfg << EOF
 menuentry \"agos\" {
@@ -33,3 +36,5 @@ EOF
 umount /mnt/agos
 losetup -d /dev/loop1
 losetup -d /dev/loop0
+
+chown $SUDO_USER:$SUDO_USER $DISK_IMAGE_PATH

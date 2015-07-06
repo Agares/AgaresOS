@@ -9,4 +9,5 @@ ASMFLAGS +=  -felf32
 all: $(DISTDIR)/boot/loader.bin
 
 $(DISTDIR)/boot/loader.bin: $(OBJFILES)
+	mkdir -p $(@D)
 	$(LD) $(LDFLAGS) $(OBJFILES) -o $@
