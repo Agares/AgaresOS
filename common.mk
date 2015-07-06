@@ -20,6 +20,8 @@ LDFLAGS := -static -L ./
 ASMFLAGS := 
 ASM = nasm
 
+.DEFAULT_GOAL=all
+
 clean:
 	find $(OBJDIR) -not -name ".*" -type f -delete
 	find $(DISTDIR) -not -name ".*" -type f -delete
