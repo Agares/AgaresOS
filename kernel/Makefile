@@ -1,3 +1,5 @@
+ARCH := x86_64
+
 -include ../common.mk
 
 LDFLAGS += -melf_x86_64 -T ./$(SRCDIR)/linker.ld

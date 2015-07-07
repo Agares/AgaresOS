@@ -1,3 +1,5 @@
+ARCH := x86
+
 -include ../common.mk
 
 LDFLAGS += -melf_i386  -T ./$(SRCDIR)/linker.ld
