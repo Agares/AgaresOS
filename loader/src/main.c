@@ -6,6 +6,7 @@
 #include "multiboot/tag.h"
 #include "multiboot/module.h"
 #include "elf/loader.h"
+#include "../../common/src/paging/paging.h"
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 #include "multiboot/multiboot2.h"
@@ -51,6 +52,26 @@ void kmain(uint32_t magic, uint32_t multiboot_information) {
 	LOG("\n");
 
 	elf_loader_load((void*)module->load_address);
+
+	for(uint64_t i = 0; i < 16*1024*1024; i+=4096) {
+		paging_map_page(i, i);
+	}
+	paging_load_pml4();
 	
+	__asm__(" \
+		mov %cr4, %eax \n \
+		orl $(1<<5), %eax \n \
+		mov %eax, %cr4 \n \
+		\
+		mov $0xC0000080, %ecx \n \
+		rdmsr \n \
+		orl $(1<<8), %eax \n \
+		wrmsr \n \
+		\
+		mov %cr0, %eax \n \
+		orl $(1<<31), %eax \n \
+		mov %eax, %cr0 \n \
+		");
+
 	while(1);
 }

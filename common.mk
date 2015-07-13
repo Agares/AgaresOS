@@ -21,7 +21,7 @@ OBJFILES := $(COBJFILES) $(ASMOBJFILES) $(COMMONCOBJFILES)
 WARNINGFLAGS := -Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
 	-Wwrite-strings -Wmissing-prototypes -Wmissing-declarations \
 	-Wredundant-decls -Wnested-externs -Winline -Wno-long-long \
-	-Wuninitialized -Wconversion -Werror
+	-Wuninitialized -Werror
 
 CFLAGS := -fno-asynchronous-unwind-tables -nostdlib -ffreestanding -std=c11 $(WARNINGFLAGS)
 LDFLAGS := -static -L ./
