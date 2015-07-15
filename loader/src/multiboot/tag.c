@@ -1,7 +1,7 @@
 #include "tag.h"
 #include <stddef.h>
-#include "../early/video.h"
-#include "../libc/stdlib.h"
+#include "../../../common/src/early/video.h"
+#include "../../../common/src/libc/stdlib.h"
 #include "../gcc.h"
 
 struct multiboot_tag *

@@ -1,6 +1,6 @@
 #include "module.h"
 #include "tag.h"
-#include "../early/log.h"
+#include "../../../common/src/early/log.h"
 #include <stddef.h>
 
 static multiboot_module modules[64];

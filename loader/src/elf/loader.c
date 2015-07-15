@@ -1,6 +1,6 @@
 #include "elf.h"
-#include "../early/log.h"
-#include "../early/panic.h"
+#include "../../../common/src/early/log.h"
+#include "../../../common/src/early/panic.h"
 #include "loader.h"
 
 static const char*
