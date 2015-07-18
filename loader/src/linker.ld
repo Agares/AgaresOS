@@ -3,6 +3,7 @@ ENTRY(_start)
 
 SECTIONS {
 	. = 0x00100000;
+	kernel_start = .;
 
 	.text ALIGN(0x1000) : {
 		*(.multiboot-header)
@@ -18,11 +19,11 @@ SECTIONS {
 	}
 
 	.bss ALIGN(0x1000) : {
-		bss_start = .;
 		*(COMMON)
 		*(.bss)
-		bss_end = .;
 	}
+
+	kernel_end = .;
 	
 	/DISCARD/ : {
 		*(.comment)

@@ -13,6 +13,11 @@
 #pragma GCC diagnostic pop
 #include <stddef.h>
 
+#define ALIGN_UP(addr) (((addr) & (~0xFFFull)) + 0x1000)
+
+extern void *kernel_start;
+extern void *kernel_end;
+
 void kmain(uint32_t, uint32_t);
 
 void kmain(uint32_t magic, uint32_t multiboot_information) {
@@ -28,10 +33,22 @@ void kmain(uint32_t magic, uint32_t multiboot_information) {
 
 	x86_gdt_setup();
 
+	uint32_t multiboot_information_total_size = ((uint32_t *)multiboot_information)[0];
+
 	struct multiboot_tag *multiboot_tags_start = (struct multiboot_tag *)(multiboot_information + 8);
 
 	// +8 here is to skip the header (4bytes size + 4bytes reserved)
-	struct multiboot_tag *tag = multiboot_find_next_tag(MULTIBOOT_TAG_TYPE_MODULE, multiboot_tags_start);
+	struct multiboot_tag_mmap *tag = (struct multiboot_tag_mmap*)multiboot_find_next_tag(MULTIBOOT_TAG_TYPE_MMAP, multiboot_tags_start);
+	unsigned int tag_count = (tag->size - 16) / tag->entry_size;
+	for (unsigned int i = 0; i < tag_count; i++) {
+		LOG("MEMMAP[");
+		LOG_NUMBER_DEC((int)i);
+		LOG("]: ");
+
+		LOG_NUMBER_HEX((int)tag->entries[i].type); LOG(" ");
+		LOG_NUMBER_HEX((int)tag->entries[i].addr); LOG(" ");
+		LOG_NUMBER_HEX((int)tag->entries[i].len);  LOG("\n");
+	}
 
 	if(tag == NULL) {
 			EARLY_PANIC("Module tag not found.");
@@ -53,9 +70,18 @@ void kmain(uint32_t magic, uint32_t multiboot_information) {
 
 	elf_loader_load((void*)module->load_address);
 
-	for(uint64_t i = 0; i < 16*1024*1024; i+=4096) {
-		paging_map_page(i, i);
-	}
+	// identity map first megabyte
+	paging_map_range(0, 1024*1024, 0);
+
+	int kernel_start_addr = (int)&kernel_start;
+	int kernel_end_addr = (int)&kernel_end;
+
+	paging_map_range((uint64_t)kernel_start_addr, ALIGN_UP((uint64_t)kernel_end_addr), (uint64_t)kernel_start_addr);
+
+	uint64_t multiboot_information_start = multiboot_information & ~0xFFFull;
+	uint64_t multiboot_information_end = ALIGN_UP(multiboot_information + multiboot_information_total_size);
+	paging_map_range(multiboot_information_start, multiboot_information_end, multiboot_information_start);
+
 	paging_load_pml4();
 	
 	__asm__(" \

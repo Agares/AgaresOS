@@ -3,6 +3,8 @@
 #include "../flags.h"
 #include "paging.h"
 #include "../early/log.h"
+#include "../early/panic.h"
+#include "../macros.h"
 #include <stdbool.h>
 
 static paging_pml4_entry pml4[512] __attribute__((aligned(4096)));
@@ -29,18 +31,15 @@ static uint64_t get_page_from_buffer() {
 }
 #pragma GCC diagnostic pop
 
-// pml4 and paging_buffer must be 1:1 mapped to physical memory
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
 void paging_map_page(uint64_t physical_address, uint64_t virtual_address) {
 	if(!IS_ALIGNED(physical_address)) {
-		// todo panic
-		return;
+		EARLY_PANIC(__FILE__ ":" STR(__LINE__) ": physical_address not aligned");
 	}
 
 	if(!IS_ALIGNED(virtual_address)) {
-		// todo panic
-		return;
+		EARLY_PANIC(__FILE__ ":" STR(__LINE__) ": virtual_address not aligned");
 	}
 
 	uint64_t pml4_index = PML4_INDEX(virtual_address);
@@ -77,6 +76,24 @@ void paging_map_page(uint64_t physical_address, uint64_t virtual_address) {
 	}
 }
 #pragma GCC diagnostic pop
+
+void paging_map_range(uint64_t physical_start, uint64_t physical_end, uint64_t virtual_start) {
+	if(!IS_ALIGNED(physical_start)) {
+		EARLY_PANIC(__FILE__ ":" STR(__LINE__) ": physical_start not aligned");
+	}
+
+	if(!IS_ALIGNED(physical_end)) {
+		EARLY_PANIC(__FILE__ ":" STR(__LINE__) ": physical_end not aligned");
+	}
+
+	if(!IS_ALIGNED(virtual_start)) {
+		EARLY_PANIC(__FILE__ ":" STR(__LINE__) ": virtual_start not aligned");
+	}
+
+	for(uint64_t v = virtual_start, p = physical_start; p < physical_end; p += 0x1000, v+= 0x1000) {
+		paging_map_page(v, p);
+	}
+}
 
 void paging_load_pml4() {
 	__asm__ __volatile__ (
