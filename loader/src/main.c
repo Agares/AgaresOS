@@ -16,8 +16,21 @@
 
 #define ALIGN_UP(addr) (((addr) & (~0xFFFull)) + 0x1000)
 
+static paging_context initial_paging;
+static uint64_t paging_buffer[512*64] aligned(0x1000);
+static int paging_buffer_index = 0;
+
 extern void *kernel_start;
 extern void *kernel_end;
+
+static uint64_t *allocate_frame() {
+	if(paging_buffer_index >= 512*63) {
+		EARLY_PANIC("Page frame buffer exhausted!");
+	}
+
+	paging_buffer_index += 512;
+	return &paging_buffer[paging_buffer_index - 512];
+}
 
 void kmain(uint32_t, uint32_t);
 
@@ -26,6 +39,8 @@ void kmain(uint32_t magic, uint32_t multiboot_information) {
 		.foreground = COLOR_YELLOW,
 		.background = COLOR_BLACK 
 	};
+
+	initial_paging.frame_allocator = &allocate_frame;
  
 	early_video_put_string("agos, version 0\n", char_color); 
 	if(magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
@@ -72,18 +87,32 @@ void kmain(uint32_t magic, uint32_t multiboot_information) {
 	elf_loader_load((void*)module->load_address);
 
 	// identity map first megabyte
-	paging_map_range(0, 1024*1024, 0);
+	paging_map_range(&initial_paging, (paging_range){
+		.physical_start = 0,
+		.physical_end = 1024*1024,
+		.virtual_start = 0
+	});
 
+	// identity map kernel
 	int kernel_start_addr = (int)&kernel_start;
 	int kernel_end_addr = (int)&kernel_end;
 
-	paging_map_range((uint64_t)kernel_start_addr, ALIGN_UP((uint64_t)kernel_end_addr), (uint64_t)kernel_start_addr);
+	paging_map_range(&initial_paging, (paging_range){
+		.physical_start = kernel_start_addr,
+		.physical_end = ALIGN_UP(kernel_end_addr),
+		.virtual_start = kernel_start_addr
+	});
 
+	// identity map multiboot tags
 	uint64_t multiboot_information_start = multiboot_information & ~0xFFFull;
 	uint64_t multiboot_information_end = ALIGN_UP(multiboot_information + multiboot_information_total_size);
-	paging_map_range(multiboot_information_start, multiboot_information_end, multiboot_information_start);
+	paging_map_range(&initial_paging, (paging_range){
+		.physical_start = multiboot_information_start,
+		.physical_end = multiboot_information_end,
+		.virtual_start = multiboot_information_start
+	});
 
-	paging_load_pml4();
+	paging_load_pml4(&initial_paging);
 	
 	cpu_enable_pae();
 	cpu_enable_ia64();
