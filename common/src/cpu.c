@@ -1,4 +1,5 @@
 #include "cpu.h"
+#include "msr.h"
 
 uint64_t cpu_read_msr(uint32_t msr_id) {
 	uint64_t value;
@@ -72,4 +73,16 @@ void cpu_write_cr4(uint64_t value) {
 	__asm__ __volatile__ (
 		"mov %0, %%cr4" : : "r"(value) : "memory"
 	);
+}
+
+void cpu_enable_pae() {
+	cpu_write_cr4(cpu_read_cr4() | (1 << 5));
+}
+
+void cpu_enable_ia64() {
+	cpu_write_msr(MSR_EFER, cpu_read_msr(MSR_EFER) | (1 << 8));
+}
+
+void cpu_enable_paging() {
+	cpu_write_cr0(cpu_read_cr0() | (1 << 31));
 }

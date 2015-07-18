@@ -85,9 +85,9 @@ void kmain(uint32_t magic, uint32_t multiboot_information) {
 
 	paging_load_pml4();
 	
-	cpu_write_cr4(cpu_read_cr4() | (1 << 5));
-	cpu_write_msr(0xC0000080, cpu_read_msr(0xC0000080) | (1 << 8));
-	cpu_write_cr0(cpu_read_cr0() | (1 << 31));
+	cpu_enable_pae();
+	cpu_enable_ia64();
+	cpu_enable_paging();
 
 	while(1);
 }

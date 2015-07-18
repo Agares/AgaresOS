@@ -12,3 +12,7 @@ uint64_t cpu_read_cr4(void);
 void cpu_write_cr0(uint64_t value);
 void cpu_write_cr3(uint64_t value);
 void cpu_write_cr4(uint64_t value);
+
+void cpu_enable_pae(void);
+void cpu_enable_ia64(void);
+void cpu_enable_paging(void);
