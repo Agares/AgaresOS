@@ -2,7 +2,7 @@
 #include <stddef.h>
 #include "../../../common/src/early/video.h"
 #include "../../../common/src/libc/stdlib.h"
-#include "../gcc.h"
+#include "../../../common/src/gcc.h"
 
 struct multiboot_tag *
 multiboot_find_next_tag(uint16_t type, struct multiboot_tag *tags_start) {

@@ -5,10 +5,11 @@
 #include "../early/log.h"
 #include "../early/panic.h"
 #include "../macros.h"
+#include "../gcc.h"
 #include <stdbool.h>
 
-static paging_pml4_entry pml4[512] __attribute__((aligned(4096)));
-static uint64_t paging_buffer[512*64] __attribute__((aligned(4096)));
+static paging_pml4_entry pml4[512] aligned(0x1000);
+static uint64_t paging_buffer[512*64] aligned(0x1000);
 static int paging_buffer_index = 0;
 
 #define IS_ALIGNED(x) (((x) % 0x1000) == 0)

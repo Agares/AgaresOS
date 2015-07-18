@@ -1,7 +1,6 @@
 #pragma once
 #include <stdint.h>
-// todo:
-#define packed __attribute__((packed))
+#include "../gcc.h"
 
 typedef struct {
 	uint8_t is_present : 1;
