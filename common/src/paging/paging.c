@@ -6,6 +6,7 @@
 #include "../early/panic.h"
 #include "../macros.h"
 #include "../gcc.h"
+#include "../cpu.h"
 #include <stdbool.h>
 
 static paging_pml4_entry pml4[512] aligned(0x1000);
@@ -29,6 +30,10 @@ static uint64_t get_page_from_buffer() {
 
 	paging_buffer_index += 512;
 	return (uint64_t)&paging_buffer[paging_buffer_index - 512];
+}
+
+void paging_load_pml4() {
+	cpu_write_cr3((uint64_t)&pml4[0]);
 }
 #pragma GCC diagnostic pop
 
@@ -94,13 +99,4 @@ void paging_map_range(uint64_t physical_start, uint64_t physical_end, uint64_t v
 	for(uint64_t v = virtual_start, p = physical_start; p < physical_end; p += 0x1000, v+= 0x1000) {
 		paging_map_page(v, p);
 	}
-}
-
-void paging_load_pml4() {
-	__asm__ __volatile__ (
-		"mov %0, %%cr3"
-		:
-		: "r" (&pml4[0])
-		: "memory"
-		);
 }

@@ -7,6 +7,7 @@
 #include "multiboot/module.h"
 #include "elf/loader.h"
 #include <paging/paging.h>
+#include <cpu.h>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 #include "multiboot/multiboot2.h"
@@ -84,20 +85,9 @@ void kmain(uint32_t magic, uint32_t multiboot_information) {
 
 	paging_load_pml4();
 	
-	__asm__(" \
-		mov %cr4, %eax \n \
-		bts $5, %eax \n \
-		mov %eax, %cr4 \n \
-		\
-		mov $0xC0000080, %ecx \n \
-		rdmsr \n \
-		bts $8, %eax \n \
-		wrmsr \n \
-		\
-		mov %cr0, %eax \n \
-		bts $31, %eax \n \
-		mov %eax, %cr0 \n \
-		");
+	cpu_write_cr4(cpu_read_cr4() | (1 << 5));
+	cpu_write_msr(0xC0000080, cpu_read_msr(0xC0000080) | (1 << 8));
+	cpu_write_cr0(cpu_read_cr0() | (1 << 31));
 
 	while(1);
 }
