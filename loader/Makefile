@@ -3,7 +3,7 @@ ARCH := x86
 -include ../common.mk
 
 LDFLAGS += -melf_i386  -T ./$(SRCDIR)/linker.ld
-CFLAGS += -m32
+CFLAGS += -m32 -Isrc
 ASMFLAGS +=  -felf32
 
 .PHONY: all clean dist kernel.bin qemu

@@ -1,12 +1,12 @@
-#include "../../common/src/early/video.h"
-#include "../../common/src/libc/stdlib.h"
-#include "../../common/src/early/panic.h"
-#include "../../common/src/early/log.h"
+#include <early/video.h>
+#include <libc/stdlib.h>
+#include <early/panic.h>
+#include <early/log.h>
 #include "arch/x86/gdt.h"
 #include "multiboot/tag.h"
 #include "multiboot/module.h"
 #include "elf/loader.h"
-#include "../../common/src/paging/paging.h"
+#include <paging/paging.h>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 #include "multiboot/multiboot2.h"

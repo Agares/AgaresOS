@@ -23,7 +23,7 @@ WARNINGFLAGS := -Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
 	-Wredundant-decls -Wnested-externs -Winline -Wno-long-long \
 	-Wuninitialized -Werror
 
-CFLAGS := -fno-asynchronous-unwind-tables -nostdlib -ffreestanding -std=c11 $(WARNINGFLAGS)
+CFLAGS := -fno-asynchronous-unwind-tables -nostdlib -ffreestanding -std=c11 -I$(COMMONDIR)/src $(WARNINGFLAGS)
 LDFLAGS := -static -L ./
 ASMFLAGS := 
 ASM = nasm

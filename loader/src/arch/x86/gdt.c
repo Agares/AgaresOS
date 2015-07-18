@@ -1,6 +1,6 @@
 #include "gdt.h"
 #include <stdint.h>
-#include "../../../../common/src/gcc.h"
+#include <gcc.h>
 
 typedef struct {
 	uint16_t limit_low;
