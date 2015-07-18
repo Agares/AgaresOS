@@ -86,16 +86,16 @@ void kmain(uint32_t magic, uint32_t multiboot_information) {
 	
 	__asm__(" \
 		mov %cr4, %eax \n \
-		orl $(1<<5), %eax \n \
+		bts $5, %eax \n \
 		mov %eax, %cr4 \n \
 		\
 		mov $0xC0000080, %ecx \n \
 		rdmsr \n \
-		orl $(1<<8), %eax \n \
+		bts $8, %eax \n \
 		wrmsr \n \
 		\
 		mov %cr0, %eax \n \
-		orl $(1<<31), %eax \n \
+		bts $31, %eax \n \
 		mov %eax, %cr0 \n \
 		");
 
