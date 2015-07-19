@@ -1,3 +1,5 @@
 obj/
 dist/
 .ycm_extra_conf*
+build/
+local/
