@@ -1,8 +1,18 @@
 #pragma once
 #include <stdint.h>
+#include <stdbool.h>
 #include <gcc.h>
 #include "structures.h"
 
+typedef union {
+	uintptr_t as_uint;
+	void *as_pointer;
+} paging_address;
+
+/**
+ * A frame allocator allocates space for a single page table, 
+ * i.e. 4096 bytes of consecutive memory, aligned to 0x1000.
+ */
 typedef uint64_t *(*frame_allocator)();
 
 typedef struct {
@@ -11,15 +21,27 @@ typedef struct {
 } paging_context;
 
 typedef struct {
-	uint64_t physical_start,
-			 physical_end,
-			 virtual_start;
+	paging_address physical_start,
+			 	   physical_end,
+			 	   virtual_start;
 } paging_range;
 
 typedef struct {
-	uint64_t physical_address,
-			 virtual_address;
+	paging_address physical_address,
+			 	   virtual_address;
 } paging_page;
+
+static inline bool paging_is_aligned(paging_address address) {
+	return (address.as_uint % 0x1000) == 0;
+}
+
+static inline paging_address paging_align_down(paging_address address) {
+	return (paging_address){ .as_uint = address.as_uint & ~((uintptr_t)0xFFFu) };
+}
+
+static inline paging_address paging_align_up(paging_address address) {
+	return (paging_address){ .as_uint = (address.as_uint + 0xFFF) & ~((uintptr_t)0xFFFu) };
+}
 
 void paging_map_page(paging_context *context, paging_page page);
 void paging_map_range(paging_context *context, paging_range range);

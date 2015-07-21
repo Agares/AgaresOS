@@ -14,8 +14,6 @@
 #pragma GCC diagnostic pop
 #include <stddef.h>
 
-#define ALIGN_UP(addr) (((addr) & (~0xFFFull)) + 0x1000)
-
 static paging_context initial_paging;
 static uint64_t paging_buffer[512*64] aligned(0x1000);
 static int paging_buffer_index = 0;
@@ -88,9 +86,9 @@ void kmain(uint32_t magic, uint32_t multiboot_information) {
 
 	// identity map first megabyte
 	paging_map_range(&initial_paging, (paging_range){
-		.physical_start = 0,
-		.physical_end = 1024*1024,
-		.virtual_start = 0
+		.physical_start = (paging_address){ .as_uint = 0 },
+		.physical_end = (paging_address){ .as_uint = 1024*1024 },
+		.virtual_start = (paging_address){ .as_uint = 0 }
 	});
 
 	// identity map kernel
@@ -98,18 +96,18 @@ void kmain(uint32_t magic, uint32_t multiboot_information) {
 	int kernel_end_addr = (int)&kernel_end;
 
 	paging_map_range(&initial_paging, (paging_range){
-		.physical_start = kernel_start_addr,
-		.physical_end = ALIGN_UP(kernel_end_addr),
-		.virtual_start = kernel_start_addr
+		.physical_start = (paging_address){ .as_uint = kernel_start_addr },
+		.physical_end = paging_align_up((paging_address){ .as_uint = kernel_end_addr }),
+		.virtual_start = (paging_address){ .as_uint = kernel_start_addr }
 	});
 
 	// identity map multiboot tags
-	uint64_t multiboot_information_start = multiboot_information & ~0xFFFull;
-	uint64_t multiboot_information_end = ALIGN_UP(multiboot_information + multiboot_information_total_size);
+	uint64_t multiboot_information_start = multiboot_information;
+	uint64_t multiboot_information_end = multiboot_information + multiboot_information_total_size;
 	paging_map_range(&initial_paging, (paging_range){
-		.physical_start = multiboot_information_start,
-		.physical_end = multiboot_information_end,
-		.virtual_start = multiboot_information_start
+		.physical_start = paging_align_down((paging_address){ .as_uint = multiboot_information_start }),
+		.physical_end = paging_align_up((paging_address){ .as_uint = multiboot_information_end }),
+		.virtual_start = paging_align_down((paging_address){ .as_uint = multiboot_information_start })
 	});
 
 	paging_load_pml4(&initial_paging);
