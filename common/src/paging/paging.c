@@ -36,25 +36,41 @@ void paging_map_page(paging_context *context, paging_page page) {
 	int pt_index = PT_INDEX(page.virtual_address.as_uint);
 
 	if(!context->pml4[pml4_index].is_present) {
-		fill_pml4_entry(&context->pml4[pml4_index], (uint64_t)context->frame_allocator(), PML4_ENTRY_PRESENT | PML4_ENTRY_WRITEABLE);
+		fill_pml4_entry(
+			context->virtual_to_physical_translator((paging_address){ .as_pointer = &context->pml4[pml4_index] }).as_pointer,
+			(uint64_t)context->frame_allocator(), 
+			PML4_ENTRY_PRESENT | PML4_ENTRY_WRITEABLE
+		);
 	}
 
 	paging_pdpt_entry *pdpt_entry = &(((paging_pdpt_entry *)(context->pml4[pml4_index].physical_address << 12))[pdpt_index]);
 
 	if(!pdpt_entry->is_present) {
-		fill_pdpt_entry(pdpt_entry, (uint64_t)context->frame_allocator(), PDPT_ENTRY_PRESENT | PDPT_ENTRY_WRITEABLE);
+		fill_pdpt_entry(
+			context->virtual_to_physical_translator((paging_address){ .as_pointer = pdpt_entry }).as_pointer,
+			(uint64_t)context->frame_allocator(), 
+			PDPT_ENTRY_PRESENT | PDPT_ENTRY_WRITEABLE
+		);
 	}
 
 	paging_pd_entry *pd_entry = &(((paging_pd_entry *)(pdpt_entry->physical_address << 12))[pd_index]);
 
 	if(!pd_entry->is_present) {
-		fill_pd_entry(pd_entry, (uint64_t)context->frame_allocator(), PD_ENTRY_PRESENT | PD_ENTRY_WRITEABLE);
+		fill_pd_entry(
+			context->virtual_to_physical_translator((paging_address){ .as_pointer = pd_entry }).as_pointer,
+			(uint64_t)context->frame_allocator(), 
+			PD_ENTRY_PRESENT | PD_ENTRY_WRITEABLE
+		);
 	}
 
 	paging_pt_entry *pt_entry = &(((paging_pt_entry *)(pd_entry->physical_address << 12))[pt_index]);
 
 	if(!pt_entry->is_present) {
-		fill_pt_entry(pt_entry, page.physical_address.as_uint, PT_ENTRY_PRESENT | PT_ENTRY_WRITEABLE);
+		fill_pt_entry(
+			context->virtual_to_physical_translator((paging_address){ .as_pointer = pt_entry }).as_pointer, 
+			page.physical_address.as_uint, 
+			PT_ENTRY_PRESENT | PT_ENTRY_WRITEABLE
+		);
 	} else {
 		LOG("Mapping from virtual ");
 		LOG_NUMBER_HEX((int)page.virtual_address.as_uint);

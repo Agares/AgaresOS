@@ -30,6 +30,10 @@ static uint64_t *allocate_frame() {
 	return &paging_buffer[paging_buffer_index - 512];
 }
 
+static paging_address translate_address(paging_address address) {
+	return address;
+}
+
 void kmain(uint32_t, uint32_t);
 
 void kmain(uint32_t magic, uint32_t multiboot_information) {
@@ -39,6 +43,7 @@ void kmain(uint32_t magic, uint32_t multiboot_information) {
 	};
 
 	initial_paging.frame_allocator = &allocate_frame;
+	initial_paging.virtual_to_physical_translator = &translate_address;
  
 	early_video_put_string("agos, version 0\n", char_color); 
 	if(magic != MULTIBOOT2_BOOTLOADER_MAGIC) {

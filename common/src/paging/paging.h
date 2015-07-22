@@ -13,10 +13,12 @@ typedef union {
  * A frame allocator allocates space for a single page table, 
  * i.e. 4096 bytes of consecutive memory, aligned to 0x1000.
  */
-typedef uint64_t *(*frame_allocator)();
+typedef uint64_t *(*paging_frame_allocator)();
+typedef paging_address (*paging_virtual_to_physical_translator)();
 
 typedef struct {
-	frame_allocator frame_allocator;
+	paging_frame_allocator frame_allocator;
+	paging_virtual_to_physical_translator virtual_to_physical_translator;
 	paging_pml4_entry pml4[512] aligned(0x1000);
 } paging_context;
 
