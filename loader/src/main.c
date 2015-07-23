@@ -30,8 +30,8 @@ static uint64_t *allocate_frame() {
 	return &paging_buffer[paging_buffer_index - 512];
 }
 
-static paging_address translate_address(paging_address address) {
-	return address;
+static paging_physical_address translate_address(paging_virtual_address address) {
+	return (paging_physical_address){ .as_uint = address };
 }
 
 void kmain(uint32_t, uint32_t);
@@ -91,28 +91,26 @@ void kmain(uint32_t magic, uint32_t multiboot_information) {
 
 	// identity map first megabyte
 	paging_map_range(&initial_paging, (paging_range){
-		.physical_start = (paging_address){ .as_uint = 0 },
-		.physical_end = (paging_address){ .as_uint = 1024*1024 },
-		.virtual_start = (paging_address){ .as_uint = 0 }
+		.physical_start = (paging_physical_address){ .as_uint = 0 },
+		.physical_end = (paging_physical_address){ .as_uint = 1024*1024 },
+		.virtual_start = 0
 	});
 
 	// identity map kernel
-	int kernel_start_addr = (int)&kernel_start;
-	int kernel_end_addr = (int)&kernel_end;
-
 	paging_map_range(&initial_paging, (paging_range){
-		.physical_start = (paging_address){ .as_uint = kernel_start_addr },
-		.physical_end = paging_align_up((paging_address){ .as_uint = kernel_end_addr }),
-		.virtual_start = (paging_address){ .as_uint = kernel_start_addr }
+		.physical_start = (paging_physical_address){ .as_pointer = &kernel_start },
+		.physical_end = paging_align_up((paging_physical_address){ .as_pointer = &kernel_end }),
+		.virtual_start = (paging_virtual_address)(uintptr_t)&kernel_start // that cast is really stupid
 	});
 
 	// identity map multiboot tags
 	uint64_t multiboot_information_start = multiboot_information;
 	uint64_t multiboot_information_end = multiboot_information + multiboot_information_total_size;
+
 	paging_map_range(&initial_paging, (paging_range){
-		.physical_start = paging_align_down((paging_address){ .as_uint = multiboot_information_start }),
-		.physical_end = paging_align_up((paging_address){ .as_uint = multiboot_information_end }),
-		.virtual_start = paging_align_down((paging_address){ .as_uint = multiboot_information_start })
+		.physical_start = paging_align_down((paging_physical_address){ .as_uint = multiboot_information_start }),
+		.physical_end = paging_align_up((paging_physical_address){ .as_uint = multiboot_information_end }),
+		.virtual_start = paging_align_down((paging_physical_address){ .as_uint = multiboot_information_start }).as_uint // todo that's stupid
 	});
 
 	paging_load_pml4(&initial_paging);

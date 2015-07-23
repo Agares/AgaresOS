@@ -12,7 +12,7 @@
 
 #define IS_ALIGNED(x) (((x) % 0x1000) == 0)
 
-#define PML4_INDEX(x) ((((uint64_t)x) >> 39) & 511)
+#define PML4_INDEX(x) (((x) >> 39) & 511)
 #define PDPT_INDEX(x) (((x) >> 30) & 511)
 #define PD_INDEX(x) (((x) >> 21) & 511)
 #define PT_INDEX(x) (((x) >> 12) & 511)
@@ -22,22 +22,22 @@
 #pragma GCC diagnostic ignored "-Wpointer-to-int-cast"
 
 void paging_map_page(paging_context *context, paging_page page) {
-	if(!paging_is_aligned(page.physical_address)) {
+	if(!paging_is_aligned_physical(page.physical_address)) {
 		EARLY_PANIC(__FILE__ ":" STR(__LINE__) ": physical_address not aligned");
 	}
 
-	if(!paging_is_aligned(page.virtual_address)) {
+	if(!paging_is_aligned_virtual(page.virtual_address)) {
 		EARLY_PANIC(__FILE__ ":" STR(__LINE__) ": virtual_address not aligned");
 	}
 
-	int pml4_index = PML4_INDEX(page.virtual_address.as_uint);
-	int pdpt_index = PDPT_INDEX(page.virtual_address.as_uint);
-	int pd_index = PD_INDEX(page.virtual_address.as_uint);
-	int pt_index = PT_INDEX(page.virtual_address.as_uint);
+	int pml4_index = PML4_INDEX(page.virtual_address);
+	int pdpt_index = PDPT_INDEX(page.virtual_address);
+	int pd_index = PD_INDEX(page.virtual_address);
+	int pt_index = PT_INDEX(page.virtual_address);
 
 	if(!context->pml4[pml4_index].is_present) {
 		fill_pml4_entry(
-			context->virtual_to_physical_translator((paging_address){ .as_pointer = &context->pml4[pml4_index] }).as_pointer,
+			context->virtual_to_physical_translator((paging_virtual_address)&context->pml4[pml4_index]).as_pointer,
 			(uint64_t)context->frame_allocator(), 
 			PML4_ENTRY_PRESENT | PML4_ENTRY_WRITEABLE
 		);
@@ -47,7 +47,7 @@ void paging_map_page(paging_context *context, paging_page page) {
 
 	if(!pdpt_entry->is_present) {
 		fill_pdpt_entry(
-			context->virtual_to_physical_translator((paging_address){ .as_pointer = pdpt_entry }).as_pointer,
+			context->virtual_to_physical_translator((paging_virtual_address)pdpt_entry).as_pointer,
 			(uint64_t)context->frame_allocator(), 
 			PDPT_ENTRY_PRESENT | PDPT_ENTRY_WRITEABLE
 		);
@@ -57,7 +57,7 @@ void paging_map_page(paging_context *context, paging_page page) {
 
 	if(!pd_entry->is_present) {
 		fill_pd_entry(
-			context->virtual_to_physical_translator((paging_address){ .as_pointer = pd_entry }).as_pointer,
+			context->virtual_to_physical_translator((paging_virtual_address)pd_entry).as_pointer,
 			(uint64_t)context->frame_allocator(), 
 			PD_ENTRY_PRESENT | PD_ENTRY_WRITEABLE
 		);
@@ -67,13 +67,13 @@ void paging_map_page(paging_context *context, paging_page page) {
 
 	if(!pt_entry->is_present) {
 		fill_pt_entry(
-			context->virtual_to_physical_translator((paging_address){ .as_pointer = pt_entry }).as_pointer, 
+			context->virtual_to_physical_translator((paging_virtual_address)pt_entry).as_pointer, 
 			page.physical_address.as_uint, 
 			PT_ENTRY_PRESENT | PT_ENTRY_WRITEABLE
 		);
 	} else {
 		LOG("Mapping from virtual ");
-		LOG_NUMBER_HEX((int)page.virtual_address.as_uint);
+		LOG_NUMBER_HEX((int)page.virtual_address);
 		LOG(" to physical ");
 		LOG_NUMBER_HEX((int)page.physical_address.as_uint);
 		LOG(" already exists!\n");
@@ -82,24 +82,27 @@ void paging_map_page(paging_context *context, paging_page page) {
 #pragma GCC diagnostic pop
 
 void paging_map_range(paging_context *context, paging_range range) {
-	if(!paging_is_aligned(range.physical_start)) {
+	if(!paging_is_aligned_physical(range.physical_start)) {
 		EARLY_PANIC(__FILE__ ":" STR(__LINE__) ": physical_start not aligned");
 	}
 
-	if(!paging_is_aligned(range.physical_end)) {
+	if(!paging_is_aligned_physical(range.physical_end)) {
 		EARLY_PANIC(__FILE__ ":" STR(__LINE__) ": physical_end not aligned");
 	}
 
-	if(!paging_is_aligned(range.virtual_start)) {
+	if(!paging_is_aligned_virtual(range.virtual_start)) {
 		EARLY_PANIC(__FILE__ ":" STR(__LINE__) ": virtual_start not aligned");
 	}
 
+	paging_virtual_address virtual = range.virtual_start;
+	paging_physical_address physical = range.physical_start;
+
 	for(
-		paging_address v = range.virtual_start, p = range.physical_start; 
-		p.as_uint < range.physical_end.as_uint; 
-		p.as_uint += 0x1000, v.as_uint += 0x1000
+		;
+		physical.as_uint < range.physical_end.as_uint; 
+		physical.as_uint += 0x1000, virtual += 0x1000
 	) {
-		paging_map_page(context, (paging_page){.physical_address = p, .virtual_address = v});
+		paging_map_page(context, (paging_page){.physical_address = physical, .virtual_address = virtual});
 	}
 }
 
