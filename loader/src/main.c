@@ -2,12 +2,14 @@
 #include <libc/stdlib.h>
 #include <early/panic.h>
 #include <early/log.h>
+#include <early/kprint.h>
 #include "arch/x86/gdt.h"
 #include "multiboot/tag.h"
 #include "multiboot/module.h"
 #include "elf/loader.h"
 #include <paging/paging.h>
 #include <cpu.h>
+#include <early/kprint.h>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 #include "multiboot/multiboot2.h"
@@ -37,15 +39,9 @@ static paging_physical_address translate_address(paging_virtual_address address)
 void kmain(uint32_t, uint32_t);
 
 void kmain(uint32_t magic, uint32_t multiboot_information) {
-	character_color char_color = { 
-		.foreground = COLOR_YELLOW,
-		.background = COLOR_BLACK 
-	};
-
 	initial_paging.frame_allocator = &allocate_frame;
 	initial_paging.virtual_to_physical_translator = &translate_address;
  
-	early_video_put_string("agos, version 0\n", char_color); 
 	if(magic != MULTIBOOT2_BOOTLOADER_MAGIC) {
 		EARLY_PANIC("Loaded from not multiboot-complaiant bootloader.");
 	}
@@ -60,32 +56,21 @@ void kmain(uint32_t magic, uint32_t multiboot_information) {
 	struct multiboot_tag_mmap *tag = (struct multiboot_tag_mmap*)multiboot_find_next_tag(MULTIBOOT_TAG_TYPE_MMAP, multiboot_tags_start);
 	unsigned int tag_count = (tag->size - 16) / tag->entry_size;
 	for (unsigned int i = 0; i < tag_count; i++) {
-		LOG("MEMMAP[");
-		LOG_NUMBER_DEC((int)i);
-		LOG("]: ");
-
-		LOG_NUMBER_HEX((int)tag->entries[i].type); LOG(" ");
-		LOG_NUMBER_HEX((int)tag->entries[i].addr); LOG(" ");
-		LOG_NUMBER_HEX((int)tag->entries[i].len);  LOG("\n");
-	}
-
-	if(tag == NULL) {
-			EARLY_PANIC("Module tag not found.");
-	} else {
-			early_video_put_string("Module tag found at ", char_color);
-			char buffer[33];
-			itoa((int)tag, buffer, 16);
-			early_video_put_string("0x", char_color);
-			early_video_put_string(buffer, char_color);
-			early_video_put_string("\n", char_color);
+		LOGF(
+			"MEMMAP[0x%qx] = T0x%qx A0x%qx L0x%qx\n", 
+			(uint64_t)i, 
+			(uint64_t)tag->entries[i].type, 
+			(uint64_t)tag->entries[i].addr, 
+			(uint64_t)tag->entries[i].len
+		);
 	}
 
 	multiboot_module *module = multiboot_module_read_next(multiboot_tags_start);
-	LOG("Multiboot module found at ");
-	LOG_NUMBER_HEX((int)module->load_address);
-	LOG(" with size ");
-	LOG_NUMBER_DEC((int)module->size);
-	LOG("\n");
+	if(module != NULL) {
+		LOGF("MBMOD: A0x%px S0x%qx", module->load_address, (uint64_t)module->size);
+	} else {
+		EARLY_PANIC("Module tag not found in multiboot information.");
+	}
 
 	elf_loader_load((void*)module->load_address);
 
