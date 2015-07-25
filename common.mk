@@ -1,4 +1,6 @@
 COMMONDIR := ../common
+CC := ../local/bin/i686-elf-gcc
+LD := ../local/bin/i686-elf-gcc
 
 SRCDIR := src
 OBJDIR := obj
@@ -24,7 +26,7 @@ WARNINGFLAGS := -Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-align \
 	-Wuninitialized -Werror
 
 CFLAGS := -fno-asynchronous-unwind-tables -nostdlib -ffreestanding -std=c11 -I$(COMMONDIR)/src $(WARNINGFLAGS)
-LDFLAGS := -static -L ./
+LDFLAGS := -static -nostdlib 
 ASMFLAGS := 
 ASM = nasm
 

@@ -1,9 +1,11 @@
 ARCH := x86_64
 
 -include ../common.mk
+CC=../local/bin/x86_64-elf-gcc
+LD=../local/bin/x86_64-elf-gcc
 
 OBJFILES += $(patsubst src/%, obj/%, $(patsubst %.rs, %.rs.o, $(shell find $(SRCDIR) -type f -name "*.rs")))
-LDFLAGS += -melf_x86_64 -T ./$(SRCDIR)/linker.ld
+LDFLAGS += -T ./$(SRCDIR)/linker.ld
 CFLAGS += -m64 -mno-red-zone -Isrc -mcmodel=kernel
 ASMFLAGS += -felf64
 RUSTC := ../local/compiler/rustc/bin/rustc
