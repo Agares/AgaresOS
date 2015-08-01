@@ -67,7 +67,7 @@ void kmain(uint32_t magic, uint32_t multiboot_information) {
 
 	multiboot_module *module = multiboot_module_read_next(multiboot_tags_start);
 	if(module != NULL) {
-		LOGF("MBMOD: A0x%px S0x%qx", module->load_address, (uint64_t)module->size);
+		LOGF("MBMOD: A0x%px S0x%qx\n", module->load_address, (uint64_t)module->size);
 	} else {
 		EARLY_PANIC("Module tag not found in multiboot information.");
 	}
