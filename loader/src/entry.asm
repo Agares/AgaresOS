@@ -14,5 +14,5 @@ _start:
 
 section .bss
 stack:
-	resb 0x4000 ; 16kB
+	resb 0x16000 ; 16kB
 stack_end:

@@ -72,7 +72,8 @@ void kmain(uint32_t magic, uint32_t multiboot_information) {
 		EARLY_PANIC("Module tag not found in multiboot information.");
 	}
 
-	elf_loader_load((void*)module->load_address);
+	uint64_t kernel_entry = elf_loader_load((void*)module->load_address, &initial_paging);
+	kprint("Kernel loaded. Entry point: %qx\n", kernel_entry);
 
 	// identity map first megabyte
 	paging_map_range(&initial_paging, (paging_range){
