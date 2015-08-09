@@ -1,20 +1,37 @@
-ARCH := x86_64
+DISTDIR := dist
+OBJDIR  := obj
+SRCDIR  := src
 
--include ../common.mk
-CC=../local/bin/x86_64-elf-gcc
-LD=../local/bin/x86_64-elf-gcc
+CPPFILES = $(shell find $(SRCDIR) -type f -name "*.cpp")
+CPPOBJFILES = $(patsubst $(SRCDIR)/%, $(OBJDIR)/%, $(patsubst %.cpp, %.o, $(CPPFILES)))
 
-OBJFILES += $(patsubst src/%, obj/%, $(patsubst %.rs, %.rs.o, $(shell find $(SRCDIR) -type f -name "*.rs")))
-LDFLAGS += -T ./$(SRCDIR)/linker.ld
-CFLAGS += -m64 -mno-red-zone -Isrc -mcmodel=kernel
-ASMFLAGS += -felf64
-RUSTC := ../local/bin/rustc
+ASMFILES = $(shell find $(SRCDIR) -type f -name "*.asm")
+ASMOBJFILES = $(patsubst $(SRCDIR)/%, $(OBJDIR)/%, $(patsubst %.asm, %.a.o, $(ASMFILES)))
+
+OBJFILES := $(CPPOBJFILES) $(ASMOBJFILES)
+
+CXXFLAGS := -Wall -Wextra -pedantic -Werror -mcmodel=kernel -I$(SRCDIR) -nostdlib -ffreestanding
+LDFLAGS  := -static -nostdlib -T./$(SRCDIR)/linker.ld
+ASMFLAGS := -felf64
+
+ASM := nasm
+CXX := ../local/bin/x86_64-elf-g++
+LD  := ../local/bin/x86_64-elf-gcc
 
 all: $(DISTDIR)/boot/kernel.bin
 
-$(OBJDIR)/%.rs.o: $(SRCDIR)/%.rs
-	LD_LIBRARY_PATH=../local/lib $(RUSTC) -O --cfg arch_$(ARCH) --target=target.json $< -o $@
-
 $(DISTDIR)/boot/kernel.bin: $(OBJFILES)
 	mkdir -p $(@D)
-	$(LD) $(LDFLAGS) $(OBJFILES) -o $@
+	$(LD) $(LDFLAGS) $(OBJFILES) -lgcc -o $@
+
+$(OBJDIR)/%.a.o: $(SRCDIR)/%.asm
+	mkdir -p $(@D)
+	$(ASM) $(ASMFLAGS) $< -o $@
+
+$(OBJDIR)/%.o: $(SRCDIR)/%.cpp
+	mkdir -p $(@D)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+clean:
+	rm -r $(OBJDIR)
+	rm -r $(DISTDIR)
