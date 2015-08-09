@@ -105,5 +105,7 @@ void kmain(uint32_t magic, uint32_t multiboot_information) {
 	cpu_enable_ia64();
 	cpu_enable_paging();
 
+	x86_gdt_setup_long_mode(kernel_entry);
+
 	while(1);
 }
