@@ -3,6 +3,8 @@
 #include <early/panic.h>
 #include "loader.h"
 #include <paging/paging.h>
+#include <memory.h>
+#include <libc/memory.h>
 
 static const char*
 get_section_type_name(Elf64_Word type) {
@@ -79,23 +81,55 @@ log_sections(Elf64_Ehdr *header) {
 }
 
 static void
+map_progbits(Elf64_Ehdr *elf_header, int section_index, paging_context *paging_context_pointer) {
+	Elf64_Shdr *section_header = get_section_header(elf_header, section_index);
+	uint32_t section_physical_start = (uint32_t)get_section(elf_header, section_index);
+
+	paging_map_range(paging_context_pointer, (paging_range){
+		.virtual_start = section_header->sh_addr,
+		.physical_start = (paging_physical_address){ .as_uint = section_physical_start },
+		.physical_end = paging_align_up((paging_physical_address){.as_uint = section_physical_start + section_header->sh_size})
+	});
+}
+
+static void
+map_nobits(Elf64_Ehdr *elf_header, int section_index, paging_context *paging_context_pointer) {
+	Elf64_Shdr *section_header = get_section_header(elf_header, section_index);
+
+	void *memory = mm_find_hole(section_header->sh_size/4096);
+	if(memory == 0) {
+		EARLY_PANIC("Not enough memory to initialize SHT_NOBITS section!");
+	}
+
+	void *memory_end = (void *)((uintptr_t)memory + (uintptr_t)section_header->sh_size);
+	mm_mark_as_used(memory, memory_end);
+
+	memset(memory, 0, section_header->sh_size);
+
+	paging_map_range(paging_context_pointer, (paging_range){
+		.virtual_start = section_header->sh_addr,
+		.physical_start = (paging_physical_address){ .as_pointer = memory },
+		.physical_end = paging_align_up((paging_physical_address){ .as_pointer = memory_end })
+	});
+}
+
+static void
 map_sections(Elf64_Ehdr *elf_header, paging_context *paging_context_pointer) {
 	for(int i = 0; i < elf_header->e_shnum; i++) {
 		Elf64_Shdr *current_section_header = get_section_header(elf_header, i);
 
 		// fixme support SHT_NOBITS (e.g. .bss)
 		// fixme 1 is const for SHT_PROGBITS - define it somewhere
-		if(current_section_header->sh_type != 1) {
-			continue;
+		switch(current_section_header->sh_type) {
+			case 1: // SHT_PROGBITS
+				map_progbits(elf_header, i, paging_context_pointer);
+				break;
+			case 8: // SHT_NOBITS
+				map_nobits(elf_header, i, paging_context_pointer);
+				break;
+			default:
+				continue;
 		}
-
-		uint32_t section_physical_start = (uint32_t)get_section(elf_header, i);
-
-		paging_map_range(paging_context_pointer, (paging_range){
-			.virtual_start = current_section_header->sh_addr,
-			.physical_start = (paging_physical_address){ .as_uint = section_physical_start },
-			.physical_end = paging_align_up((paging_physical_address){.as_uint = section_physical_start + current_section_header->sh_size})
-		});
 	}
 }
 
