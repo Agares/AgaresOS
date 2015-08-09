@@ -1,11 +1,11 @@
-OUTPUT_FORMAT(elf64-x86-64)
-ENTRY(_start)
+ENTRY(kmain)
 
 SECTIONS {
-	. = 0x00100000;
+	. = 0xffffffff80000000;
 
 	.text ALIGN(0x1000) : {
 		*(.text)
+		*(.text.*)
 	}
 
 	.data ALIGN(0x1000) : {
@@ -25,5 +25,6 @@ SECTIONS {
 	
 	/DISCARD/ : {
 		*(.comment)
+		*(.eh_frame)
 	}
 }

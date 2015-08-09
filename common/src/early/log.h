@@ -1,12 +1,17 @@
 #pragma once
 #include "video.h"
 #include "../libc/stdlib.h"
+#include "kprint.h"
 
 extern character_color early_log_colors;
 
 #define LOG(str) do { \
-		early_video_put_string(str, early_log_colors); \
-	} while (0)
+		kprint("%s", str); \
+} while (0)
+
+#define LOGF(str, ...) do { \
+		kprint(str, __VA_ARGS__); \
+} while (0)
 
 #define LOG_NUMBER(num, base) do { \
 		char buffer[33]; \

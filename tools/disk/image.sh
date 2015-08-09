@@ -11,7 +11,6 @@ p
 2048
 65535
 a
-1
 w
 EOF
 fdisk -lu $DISK_IMAGE_PATH

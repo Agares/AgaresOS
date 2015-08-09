@@ -1,8 +1,8 @@
 #include "tag.h"
 #include <stddef.h>
-#include "../early/video.h"
-#include "../libc/stdlib.h"
-#include "../gcc.h"
+#include <early/video.h>
+#include <libc/stdlib.h>
+#include <gcc.h>
 
 struct multiboot_tag *
 multiboot_find_next_tag(uint16_t type, struct multiboot_tag *tags_start) {
