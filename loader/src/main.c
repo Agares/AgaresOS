@@ -10,6 +10,7 @@
 #include <paging/paging.h>
 #include <cpu.h>
 #include <early/kprint.h>
+#include "memory.h"
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 #include "multiboot/multiboot2.h"
@@ -72,9 +73,6 @@ void kmain(uint32_t magic, uint32_t multiboot_information) {
 		EARLY_PANIC("Module tag not found in multiboot information.");
 	}
 
-	uint64_t kernel_entry = elf_loader_load((void*)module->load_address, &initial_paging);
-	kprint("Kernel loaded. Entry point: %qx\n", kernel_entry);
-
 	// identity map first megabyte
 	paging_map_range(&initial_paging, (paging_range){
 		.physical_start = (paging_physical_address){ .as_uint = 0 },
@@ -98,6 +96,14 @@ void kmain(uint32_t magic, uint32_t multiboot_information) {
 		.physical_end = paging_align_up((paging_physical_address){ .as_uint = multiboot_information_end }),
 		.virtual_start = paging_align_down((paging_physical_address){ .as_uint = multiboot_information_start }).as_uint // todo that's stupid
 	});
+
+	mm_mark_as_used((void *)0, (void *)(1024*1024));
+	mm_mark_as_used(&kernel_start, &kernel_end);
+	mm_mark_as_used((void *)(uintptr_t)multiboot_information_start, (void *)(uintptr_t)multiboot_information_end); // fixme hack
+	mm_mark_as_used(module->load_address, (void *)((uintptr_t)module->load_address + module->size));
+
+	uint64_t kernel_entry = elf_loader_load((void*)module->load_address, &initial_paging);
+	kprint("Kernel loaded. Entry point: %qx\n", kernel_entry);
 
 	paging_load_pml4(&initial_paging);
 	
