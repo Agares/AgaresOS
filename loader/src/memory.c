@@ -51,3 +51,7 @@ void *mm_find_hole(int pages) {
 
 	return NULL;
 }
+
+void *mm_get_map() {
+	return &usage_bitmap[0];
+}

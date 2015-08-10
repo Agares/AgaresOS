@@ -23,6 +23,7 @@ gdt_load_64:
 	push ebp
 	mov ebp, esp
 	mov eax, [ebp+8]
+	mov edi, [ebp+20]
 
 	lgdt [eax]
 	mov ax, 0x10

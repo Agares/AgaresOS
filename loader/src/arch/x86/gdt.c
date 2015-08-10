@@ -22,7 +22,7 @@ typedef struct {
 } packed gdt_pointer_64;
 
 extern void gdt_load(gdt_pointer *pointer);
-extern void gdt_load_64(gdt_pointer_64 *pointer, uint64_t code_address);
+extern void gdt_load_64(gdt_pointer_64 *pointer, uint64_t code_address, uint64_t first_argument);
 
 static void
 gdt_create_entry(gdt_entry *entry, uint32_t base, uint32_t limit, uint8_t access, uint8_t granularity) {
@@ -55,7 +55,7 @@ x86_gdt_setup() {
 }
 
 void
-x86_gdt_setup_long_mode(uint64_t code_address) {
+x86_gdt_setup_long_mode(uint64_t code_address, uint32_t first_argument) {
 	gdt_entry gdt[3];
 	gdt_pointer_64 gdt_ptr;
 
@@ -67,5 +67,5 @@ x86_gdt_setup_long_mode(uint64_t code_address) {
 	gdt_ptr.limit = sizeof(gdt)-1;
 	gdt_ptr.base = (uint64_t)(uintptr_t)&gdt[0];
 
-	gdt_load_64(&gdt_ptr, code_address);
+	gdt_load_64(&gdt_ptr, code_address, first_argument);
 }
