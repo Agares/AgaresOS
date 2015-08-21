@@ -24,6 +24,7 @@ extern "C" int kmain(uint32_t memoryMapAddress) {
 
 	video.Clear();
 	output << StringFragment("Hello from kernel.\n") << IntegerFragment(1024);
+	output << StringFragment("\n0x") << IntegerFragment((uintptr_t)&video);
 
 	while(true) {}
 }
