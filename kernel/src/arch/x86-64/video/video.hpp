@@ -27,7 +27,7 @@ namespace AgaresOS {
 			void PutString(const char * string, Color foreground = Color::LightGray, Color background = Color::Black);
 			void Clear();
 		private:
-			uint16_t *videoMemory = (uint16_t*)0xb8000;
+			volatile uint16_t *videoMemory = (volatile uint16_t*)0xb8000;
 			uint16_t index = 0;
 
 			const int WIDTH = 80;

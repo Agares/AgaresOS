@@ -2,7 +2,25 @@
 
 namespace AgaresOS {
 	void Video::PutChar(char c, Video::Color foreground, Video::Color background) {
-		videoMemory[index++] = c | PackColor(foreground, background);
+		if(index >= Video::WIDTH * Video::HEIGHT) {
+			index = 0;
+		}
+
+		switch(c) {
+			case '\n':
+				index -= index%Video::WIDTH;
+				index += Video::WIDTH;
+				break;
+
+			case '\t':
+				index += 8;
+				break;
+
+			default:
+				videoMemory[index++] = c | PackColor(foreground, background);
+				break;
+		}
+
 	}
 
 	void Video::PutString(const char *string, Video::Color foreground, Video::Color background) {
