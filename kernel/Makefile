@@ -10,7 +10,7 @@ ASMOBJFILES = $(patsubst $(SRCDIR)/%, $(OBJDIR)/%, $(patsubst %.asm, %.a.o, $(AS
 
 OBJFILES := $(CPPOBJFILES) $(ASMOBJFILES)
 
-CXXFLAGS := -Wall -Wextra -pedantic -Werror -mcmodel=kernel -I$(SRCDIR) -I$(SRCDIR)/arch/x86-64 -nostdlib -ffreestanding -std=c++14
+CXXFLAGS := -Wall -Wextra -pedantic -Werror -mcmodel=kernel -I$(SRCDIR) -I$(SRCDIR)/arch/x86-64 -nostdlib -ffreestanding -std=c++14 -fno-rtti -fno-exceptions
 LDFLAGS  := -static -nostdlib -T./$(SRCDIR)/linker.ld
 ASMFLAGS := -felf64
 

@@ -1,16 +1,28 @@
 #include <stdint.h>
 #include <video/video.hpp>
+#include <debug/VideoSink.hpp>
+#include <debug/DebugOutput.hpp>
+#include <debug/debug_fragment/StringFragment.hpp>
+#include <debug/debug_fragment/IntegerFragment.hpp>
 
+using AgaresOS::Debug::VideoSink;
+using AgaresOS::Debug::DebugOutput;
+using AgaresOS::Debug::StringFragment;
+using AgaresOS::Debug::IntegerFragment;
 using AgaresOS::Video;
 
-extern "C" int kmain(uint32_t test) {
-	Video video;
-	video.Clear();
-	video.PutString("Hello from kernel");
+extern "C" void __cxa_pure_virtual() {
+	// fixme add kernel panic
+}
 
-	do {
-		video.PutChar("0123456789"[test%10]);
-	} while((test /= 10) != 0);
+extern "C" int kmain(uint32_t memoryMapAddress) {
+	(void)memoryMapAddress;
+
+	Video video;
+	VideoSink sink(video);
+	DebugOutput output(sink);
+
+	output << StringFragment("Hello from kernel.\n") << IntegerFragment(1024);
 
 	while(true) {}
 }
