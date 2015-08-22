@@ -12,7 +12,7 @@ if [ $? -ne 0 ]; then
 fi
 cd ..
 
-sudo ./tools/disk/image.sh
+sudo ./tools/disk/image_update.sh
 
 case $1 in
 		bochs)
