@@ -14,16 +14,16 @@ a
 w
 EOF
 fdisk -lu $DISK_IMAGE_PATH
-losetup /dev/loop0 $DISK_IMAGE_PATH
-losetup -o 1048576 /dev/loop1 $DISK_IMAGE_PATH
-mkfs.ext2 /dev/loop1
+losetup /dev/loop4 $DISK_IMAGE_PATH
+losetup -o 1048576 /dev/loop5 $DISK_IMAGE_PATH
+mkfs.ext2 /dev/loop5
 mkdir -p /mnt/agos
-mount -t ext2 /dev/loop1 /mnt/agos
+mount -t ext2 /dev/loop5 /mnt/agos
 cp -R loader/dist/boot/* /mnt/agos
 cp -R kernel/dist/boot/* /mnt/agos
 mkdir -p /mnt/agos/boot/grub/
-grub-install --target=i386-pc --root-directory=/mnt/agos --no-floppy \
-	--modules="normal part_msdos ext2 multiboot" /dev/loop0
+grub2-install --target=i386-pc --root-directory=/mnt/agos --no-floppy \
+	--modules="normal part_msdos ext2 multiboot" /dev/loop4
 cat > /mnt/agos/boot/grub/grub.cfg << EOF
 menuentry \"agos\" {
 	set root=(hd0,msdos1)
@@ -33,7 +33,7 @@ menuentry \"agos\" {
 }
 EOF
 umount /mnt/agos
-losetup -d /dev/loop1
-losetup -d /dev/loop0
+losetup -d /dev/loop5
+losetup -d /dev/loop4
 
 chown $SUDO_USER:$SUDO_USER $DISK_IMAGE_PATH
