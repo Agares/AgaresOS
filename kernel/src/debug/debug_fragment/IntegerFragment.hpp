@@ -43,4 +43,8 @@ namespace AgaresOS { namespace Debug {
 	inline void IntegerFragment::SetBase(uint8_t base) {
 		this->base = base;
 	}
+
+	inline DebugOutput &operator<<(DebugOutput &output, uintmax_t value) {
+		return output << IntegerFragment(value);
+	}
 }}

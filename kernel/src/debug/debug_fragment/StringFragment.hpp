@@ -17,4 +17,8 @@ namespace AgaresOS { namespace Debug {
 			sink.PutCharacter(value[i]);
 		}	
 	}
+
+	DebugOutput &operator<<(DebugOutput &sink, const char *const value) {
+		return sink << StringFragment(value);
+	}
 }}

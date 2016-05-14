@@ -16,15 +16,17 @@ extern "C" void __cxa_pure_virtual() {
 }
 
 extern "C" int kmain(uint32_t memoryMapAddress) {
-	(void)memoryMapAddress;
-
 	Video video;
 	VideoSink sink(video);
 	DebugOutput output(sink);
 
 	video.Clear();
-	output << StringFragment("Hello from kernel.\n") << IntegerFragment(1024);
-	output << StringFragment("\n0x") << IntegerFragment((uintptr_t)&video);
+	output << "Hello from AgaresOS kernel!";
+	output << "We can print numbers! \n";
+	output << "Hex (default): " << 987 << "\n";
+	output << "Decimal      : " << IntegerFragment(987, 10) << "\n";
+	output << "Binary       : " << IntegerFragment(987, 2) << "\n";
+	output << "The memory map is located at: 0x" << memoryMapAddress << "\n";
 
 	while(true) {}
 }
