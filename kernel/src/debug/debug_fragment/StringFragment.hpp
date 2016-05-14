@@ -18,7 +18,7 @@ namespace AgaresOS { namespace Debug {
 		}	
 	}
 
-	DebugOutput &operator<<(DebugOutput &sink, const char *const value) {
+	inline DebugOutput &operator<<(DebugOutput &sink, const char *const value) {
 		return sink << StringFragment(value);
 	}
 }}
