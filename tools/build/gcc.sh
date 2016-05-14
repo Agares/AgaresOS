@@ -1,18 +1,20 @@
 PROJECT_DIR=`pwd`
 PREFIX=$PROJECT_DIR/local/
+BINUTILS_VERSION=2.26
+GCC_VERSION=6.1.0
 
 export PATH="$PREFIX/bin:$PATH"
 
 mkdir -p build/cross/gcc/
 cd build/cross/gcc/
 
-wget ftp://ftp.gnu.org/gnu/binutils/binutils-2.25.tar.gz
-wget ftp://ftp.gnu.org/gnu/gcc/gcc-4.9.3/gcc-4.9.3.tar.gz
+wget ftp://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.gz
+wget ftp://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.gz
 
-tar zxf binutils-2.25.tar.gz
-tar zxf gcc-4.9.3.tar.gz
+tar zxf binutils-${BINUTILS_VERSION}.tar.gz
+tar zxf gcc-${GCC_VERSION}.tar.gz
 
-cd binutils-2.25/
+cd binutils-${BINUTILS_VERSION}/
 mkdir build
 cd build
 ../configure --prefix=$PREFIX --target=i686-elf --with-sysroot --disable-nls --disable-werror
@@ -28,7 +30,7 @@ make install
 cd ..
 
 cd ..
-cd gcc-4.9.3/
+cd gcc-${GCC_VERSION}/
 
 mkdir build
 cd build
