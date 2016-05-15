@@ -11,6 +11,7 @@
 #include <cpu.h>
 #include <early/kprint.h>
 #include "memory.h"
+#include "bootloader_information.h"
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 #include "multiboot/multiboot2.h"
@@ -49,6 +50,13 @@ void kmain(uint32_t magic, uint32_t multiboot_information) {
 
 	x86_gdt_setup();
 
+	bootloader_information bootloader_info = {
+		.version = 1,
+		.bootloader_tag = "AgaresOS loader",
+		.memory_map_entry_size = sizeof(memory_map_entry)
+	};
+
+
 	uint32_t multiboot_information_total_size = ((uint32_t *)multiboot_information)[0];
 
 	struct multiboot_tag *multiboot_tags_start = (struct multiboot_tag *)(multiboot_information + 8);
@@ -64,7 +72,31 @@ void kmain(uint32_t magic, uint32_t multiboot_information) {
 			(uint64_t)tag->entries[i].addr, 
 			(uint64_t)tag->entries[i].len
 		);
+		bootloader_info.memory_map[i].start_address = tag->entries[i].addr;
+		bootloader_info.memory_map[i].end_address = tag->entries[i].addr + tag->entries[i].len;
+		int type = 0;
+		switch(tag->entries[i].type) {
+			case MULTIBOOT_MEMORY_AVAILABLE:
+				type = MEMORY_MAP_ENTRY_FREE;
+				break;
+			case MULTIBOOT_MEMORY_RESERVED:
+			case MULTIBOOT_MEMORY_BADRAM:
+				type = MEMORY_MAP_ENTRY_UNAVAILABLE;
+				break;
+			case MULTIBOOT_MEMORY_ACPI_RECLAIMABLE:
+				type = MEMORY_MAP_ENTRY_ACPI;
+				break;
+			case MULTIBOOT_MEMORY_NVS:
+				type = MEMORY_MAP_ENTRY_ACPI_NVS;
+				break;
+		}
+
+		bootloader_info.memory_map[i].type = type;
 	}
+
+	bootloader_info.memory_map[tag_count].type = MEMORY_MAP_ENTRY_KERNEL;
+	bootloader_info.memory_map[tag_count].start_address = (uintptr_t)(&kernel_start);
+	bootloader_info.memory_map[tag_count].end_address = (uintptr_t)(&kernel_end);
 
 	multiboot_module *module = multiboot_module_read_next(multiboot_tags_start);
 	if(module != NULL) {
@@ -111,7 +143,7 @@ void kmain(uint32_t magic, uint32_t multiboot_information) {
 	cpu_enable_ia64();
 	cpu_enable_paging();
 
-	x86_gdt_setup_long_mode(kernel_entry, (uint32_t)mm_get_map());
+	x86_gdt_setup_long_mode(kernel_entry, (uint32_t)(&bootloader_info));
 
 	while(1);
 }

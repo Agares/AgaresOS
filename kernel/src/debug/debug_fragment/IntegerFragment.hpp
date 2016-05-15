@@ -45,6 +45,6 @@ namespace AgaresOS { namespace Debug {
 	}
 
 	inline DebugOutput &operator<<(DebugOutput &output, uintmax_t value) {
-		return output << IntegerFragment(value);
+		return output << "0x" << IntegerFragment(value);
 	}
 }}
